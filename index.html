@@ -33,6 +33,10 @@
   window.firebaseDb = { db, collection, query, where, onSnapshot, doc, getDoc, setDoc, updateDoc, runTransaction };
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  emailjs.init({ publicKey: "RK7H9vu_Lbg_WIh0T" });
+</script>
 <style>
   :root {
     --porcelain: #FBFAF7;
@@ -521,7 +525,7 @@
   <div id="confirmView">
     <div class="confirm-mark">✓</div>
     <h2 id="confirmHeading" tabindex="-1">You're booked.</h2>
-    <p>A confirmation will be sent to the contact details you provided.</p>
+    <p>Save this — the clinic has been notified of your booking.</p>
     <p>Questions? Email <strong>sdcbahawalpur@gmail.com</strong> or call the clinic.</p>
     <div class="confirm-detail" id="confirmDetail"></div>
     <button class="link-btn" id="bookAnotherBtn">Book another appointment</button>
@@ -865,6 +869,7 @@
           return;
         }
       }
+      notifyAdmin(record);
       showConfirmation(record);
     } catch (e) {
       statusLine.textContent = "Couldn't save that — please try again.";
@@ -873,6 +878,19 @@
       bookBtn.textContent = 'Confirm appointment';
     }
   });
+
+  function notifyAdmin(record) {
+    if (typeof emailjs === 'undefined') return;
+    emailjs.send('service_zl6lv8w', 'template_0pj6mgo', {
+      patient_name: record.patientName,
+      phone: record.phone,
+      patient_email: record.email,
+      service: record.service,
+      date: formatDateLong(record.date),
+      time: formatTime12(record.time),
+      notes: record.notes || '—'
+    }).catch(() => { /* booking already succeeded; email failure shouldn't block the patient */ });
+  }
 
   function showFormError(msg, field) {
     formError.textContent = msg;
