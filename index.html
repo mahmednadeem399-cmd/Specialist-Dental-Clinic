@@ -870,6 +870,7 @@
         }
       }
       notifyAdmin(record);
+      syncToCalendar(record);
       showConfirmation(record);
     } catch (e) {
       statusLine.textContent = "Couldn't save that — please try again.";
@@ -878,6 +879,27 @@
       bookBtn.textContent = 'Confirm appointment';
     }
   });
+
+  const CALENDAR_SYNC_URL = 'https://script.google.com/macros/s/AKfycbzeKN1SdZI8LYFiFi9B1oRSkT_aBtxPa1S6v_tCcGqTeS-fo9i7H-ZYRj9MDo5Q6UP7fQ/exec';
+
+  function syncToCalendar(record) {
+    // text/plain avoids a CORS preflight; the Apps Script side still
+    // parses the body as JSON regardless of the header we send.
+    fetch(CALENDAR_SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        patientName: record.patientName,
+        phone: record.phone,
+        email: record.email,
+        service: record.service,
+        date: record.date,
+        time: record.time,
+        notes: record.notes,
+        durationMinutes: SLOT_MIN
+      })
+    }).catch(() => { /* booking already succeeded; calendar sync failure shouldn't block the patient */ });
+  }
 
   function notifyAdmin(record) {
     if (typeof emailjs === 'undefined') return;
@@ -936,11 +958,6 @@
     updateSummary();
     updateBookButton();
   });
-
-  // NOTE: Google Calendar auto-sync isn't wired up yet — that comes back
-  // as a Firebase Cloud Function once Firestore is live (see the roadmap
-  // step for rebuilding the calendar sync). For now, bookings just save
-  // straight to Firestore.
 
   // init
   renderTimeGrid();
