@@ -160,8 +160,11 @@
     font-size: 13.5px;
     color: var(--ink-soft);
   }
-  .hero-meta span { white-space: nowrap; }
-
+   .hero-meta span { white-space: nowrap; }
+   @media (max-width: 480px) {
+   .hero-meta span.address { white-space: normal; flex-basis: 100%; }
+    }}
+  
   /* Steps */
   .step {
     margin-bottom: 26px;
@@ -460,8 +463,7 @@
 <h1>Specialist Dental Clinic</h1>
     <p>Book a checkup, cleaning, or visit in a couple of minutes — no phone call needed.</p>
     <div class="hero-meta">
-      <span>📍 Near Alpha Sequre, opposite Girls H/S School, Commercial Area, Satellite Town, Bahawalpur</span>
-      <span>☎ +92 318 6379364</span>
+<span class="address">📍 Near Alpha Sequre, opposite Girls H/S School,Commercial Area, Satellite Town, Bahawalpur</span>      <span>☎ +92 318 6379364</span>
       <span>✉ sdcbahawalpur@gmail.com</span>
       <span>Mon–Sat, 5 PM–10 PM · Closed Sunday</span>
     </div>
