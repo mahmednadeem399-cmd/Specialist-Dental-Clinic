@@ -6,7 +6,8 @@
 <title>Specialist Dental Clinic — Book an Appointment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script type="module">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import {
     getFirestore, collection, query, where, onSnapshot,
@@ -128,20 +129,19 @@
     position: relative;
     z-index: 1;
   }
-  .hero-eyebrow {
+    .hero-eyebrow {
     font-family: 'Fraunces', serif;
     font-style: normal;
-    font-size: clamp(32px, 9vw, 46px);
-    font-weight: 700;
-    color: var(--sage-deep);
-    margin: 0 0 10px;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-  }
-  .hero h1 {
-    font-family: 'Fraunces', serif;
+    font-size: 20px;
     font-weight: 500;
-    font-size: clamp(22px, 5.5vw, 28px);
+    color: var(--ochre);
+    margin: 0 0 6px;
+    line-height: 1.25;
+  }
+    .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: clamp(32px, 9vw, 46px);
     line-height: 1.1;
     margin: 0 0 10px;
     color: var(--sage-deep);
@@ -455,10 +455,9 @@
   <ellipse cx="86" cy="68" rx="9" ry="7" fill="var(--ochre)"/>
 </svg>
 <div class="wrap">
-
-  <div class="hero">
-<p class="hero-eyebrow">Specialist Dental Clinic</p>
-    <h1>Let's find you a time.</h1>
+<div class="hero">
+<p class="hero-eyebrow">Let's find you a time.</p>
+<h1>Specialist Dental Clinic</h1>>
     <p>Book a checkup, cleaning, or visit in a couple of minutes — no phone call needed.</p>
     <div class="hero-meta">
       <span>📍 Near Alpha Sequre, opposite Girls H/S School, Commercial Area, Satellite Town, Bahawalpur</span>
