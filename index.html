@@ -6,8 +6,7 @@
 <title>Specialist Dental Clinic — Book an Appointment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script type="module">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import {
     getFirestore, collection, query, where, onSnapshot,
@@ -131,17 +130,18 @@
   }
   .hero-eyebrow {
     font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 28px;
-    font-weight: 600;
+    font-style: normal;
+    font-size: clamp(32px, 9vw, 46px);
+    font-weight: 700;
     color: var(--sage-deep);
-    margin: 0 0 8px;
-    line-height: 1.25;
+    margin: 0 0 10px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
   }
   .hero h1 {
     font-family: 'Fraunces', serif;
     font-weight: 500;
-    font-size: clamp(28px, 7vw, 38px);
+    font-size: clamp(22px, 5.5vw, 28px);
     line-height: 1.1;
     margin: 0 0 10px;
     color: var(--sage-deep);
@@ -457,7 +457,7 @@
 <div class="wrap">
 
   <div class="hero">
-    <p class="hero-eyebrow">Specialist Dental Clinic<br>Asst. Prof. Dr. Ahmed Mukhtar Cheema</p>
+<p class="hero-eyebrow">Specialist Dental Clinic</p>
     <h1>Let's find you a time.</h1>
     <p>Book a checkup, cleaning, or visit in a couple of minutes — no phone call needed.</p>
     <div class="hero-meta">
@@ -499,22 +499,18 @@
       <div class="step-label"><span class="step-num">4</span><h2 class="step-title">Your details</h2></div>
       <div class="field">
         <label for="patientName">Full name</label>
-        <input id="patientName" type="text" autocomplete="name" placeholder="Jordan Ellis" aria-describedby="formError">
-      </div>
+<input id="patientName" type="text" autocomplete="name" placeholder="Ahmed Khan" maxlength="100" aria-describedby="formError">      </div>
       <div class="two-col">
         <div class="field">
           <label for="patientPhone">Phone</label>
-          <input id="patientPhone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" aria-describedby="formError">
-        </div>
+<input id="patientPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="03XX XXXXXXX" maxlength="20" aria-describedby="formError">        </div>
         <div class="field">
-          <label for="patientEmail">Email</label>
-          <input id="patientEmail" type="email" autocomplete="email" placeholder="jordan@email.com" aria-describedby="formError">
-        </div>
+<label for="patientEmail">Email (optional)</label>
+          <input id="patientEmail" type="email" autocomplete="email" placeholder="name@email.com (optional)" maxlength="100" aria-describedby="formError">        </div>
       </div>
       <div class="field">
         <label for="patientNotes">Anything we should know? (optional)</label>
-        <textarea id="patientNotes" placeholder="New patient, tooth sensitivity, insurance questions…"></textarea>
-      </div>
+<textarea id="patientNotes" placeholder="New patient, tooth pain, any questions…" maxlength="500"></textarea>      </div>
       <div class="field-error" id="formError" role="alert" style="display:none;"></div>
     </div>
 
@@ -550,8 +546,18 @@
   };
 
   // ---------- date / slot helpers ----------
-  const TODAY = new Date();
-  TODAY.setHours(0,0,0,0);
+  const CLINIC_TZ = 'Asia/Karachi';
+function clinicNow() {
+  const p = new Intl.DateTimeFormat('en-CA', {
+    timeZone: CLINIC_TZ, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  }).formatToParts(new Date());
+  const g = t => p.find(x => x.type === t).value;
+  return { date: g('year') + '-' + g('month') + '-' + g('day'), minutes: +g('hour') * 60 + +g('minute') };
+}
+const SLOT_BUFFER_MIN = 30; // stop offering a slot 30 min before it starts
+const _cn = clinicNow().date.split('-').map(Number);
+const TODAY = new Date(_cn[0], _cn[1] - 1, _cn[2]);
   const MAX_BOOKING_DAYS_AHEAD = 60;
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -691,12 +697,16 @@
 
   // auto-select the first bookable day so a time grid has something to show
   (function selectFirstBookableDay() {
-    let d = new Date(TODAY);
-    while (!isBookable(d)) d = new Date(d.getTime() + 86400000);
-    viewYear = d.getFullYear();
-    viewMonth = d.getMonth();
-    state.dateISO = isoDate(d);
-  })();
+  const now = clinicNow();
+  const slots = allSlotsForDay();
+  const [lh, lm] = (slots[slots.length - 1] || '00:00').split(':').map(Number);
+  let d = new Date(TODAY);
+  if ((lh * 60 + lm) <= now.minutes + SLOT_BUFFER_MIN) d = new Date(d.getTime() + 86400000);
+  while (!isBookable(d)) d = new Date(d.getTime() + 86400000);
+  viewYear = d.getFullYear();
+  viewMonth = d.getMonth();
+  state.dateISO = isoDate(d);
+})();
   renderCalendar();
 
   // ---------- render: time grid ----------
@@ -710,8 +720,10 @@
       btn.type = 'button';
       btn.className = 'time-slot';
       btn.textContent = formatTime12(t);
-      const taken = state.takenTimes.has(t);
-      if (taken) {
+const now = clinicNow();
+const [sh, sm] = t.split(':').map(Number);
+const passed = state.dateISO === now.date && (sh * 60 + sm) <= now.minutes + SLOT_BUFFER_MIN;
+const taken = state.takenTimes.has(t) || passed;      if (taken) {
         btn.classList.add('taken');
         btn.disabled = true;
         btn.setAttribute('aria-label', formatTime12(t) + ', unavailable');
@@ -789,15 +801,18 @@
   const bookBtn = document.getElementById('bookBtn');
   const formError = document.getElementById('formError');
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
-
+  function validPhone(v) {
+  const d = v.replace(/\D/g, '');
+  return /^(0?3\d{9}|923\d{9})$/.test(d);
+}
   function updateBookButton() {
     if (!state.service || !state.dateISO || !state.time) {
       bookBtn.disabled = true;
       bookBtn.textContent = 'Choose a service, day and time';
       return;
     }
-    const hasDetails = nameInput.value.trim() && phoneInput.value.trim() && validEmail(emailInput.value.trim());
-    if (!hasDetails) {
+   const emailVal = emailInput.value.trim();
+   const hasDetails = nameInput.value.trim() && validPhone(phoneInput.value.trim()) && (!emailVal || validEmail(emailVal));    if (!hasDetails) {
       bookBtn.disabled = true;
       bookBtn.textContent = 'Enter your details to continue';
       return;
@@ -823,9 +838,8 @@
     const email = emailInput.value.trim();
 
     if (!name) { showFormError('Enter your name.', nameInput); return; }
-    if (!phone) { showFormError('Enter a phone number.', phoneInput); return; }
-    if (!email || !validEmail(email)) { showFormError('Enter a valid email.', emailInput); return; }
-
+    if (!validPhone(phone)) { showFormError('Enter a valid phone number.', phoneInput); return; }
+    if (email && !validEmail(email)) { showFormError('Enter a valid email or leave it blank.', emailInput); return; }
     bookBtn.disabled = true;
     bookBtn.textContent = 'Booking…';
     statusLine.textContent = '';
@@ -906,7 +920,7 @@
     emailjs.send('service_zl6lv8w', 'template_0pj6mgo', {
       patient_name: record.patientName,
       phone: record.phone,
-      patient_email: record.email,
+patient_email: record.email || 'Not provided',
       service: record.service,
       date: formatDateLong(record.date),
       time: formatTime12(record.time),
